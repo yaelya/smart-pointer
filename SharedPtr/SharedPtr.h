@@ -44,7 +44,7 @@ catch(std::bad_alloc& e)
 template<typename T>
 SharedPtr<T>::~SharedPtr()
 {
-	std::cout << "Dtor m_refCount:  "<<*(m_refCount) << std::endl;
+	/*std::cout << "Dtor m_refCount:  "<<*(m_refCount) << std::endl;*/
 	release();
 }
 
