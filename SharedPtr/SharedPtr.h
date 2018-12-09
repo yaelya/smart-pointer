@@ -8,8 +8,11 @@ public:
 	explicit SharedPtr(T* ptr = NULL);
 	SharedPtr(const SharedPtr& other);
 	~SharedPtr();
+	
+	void release();
 
 	SharedPtr& operator= (const SharedPtr&);
+	SharedPtr& operator= (T* ptr);
 	T* operator->() const; 
 	T& operator*()  const;
 	bool operator!=(const SharedPtr&) const;
@@ -23,45 +26,79 @@ private:
 	size_t* m_refCount;
 };
 
+
 /* -------------------------------------- */
 template<typename T>
-SharedPtr<T>::SharedPtr(T* ptr):m_ptr(ptr)
+SharedPtr<T>::SharedPtr(T* ptr)try 
+		:m_ptr(ptr)
+		, m_refCount(new size_t(1))
 {
-	m_refCount = new size_t;
-	*m_refCount = 1;
+}
+catch(std::bad_alloc& e)
+{
+	delete ptr;
+	throw;
 }
 
 
 template<typename T>
 SharedPtr<T>::~SharedPtr()
 {
-	if (*m_refCount == 1)
+	std::cout << "Dtor m_refCount:  "<<*(m_refCount) << std::endl;
+	release();
+}
+
+
+template<typename T>
+void SharedPtr<T>::release()
+{
+	--*(m_refCount);
+	if (*m_refCount == 0)
+	{
 		delete m_ptr;
-	else
-		m_refCount--;
-	
+		delete m_refCount;
+	}
 }
 
 
 template<typename T>
 SharedPtr<T>::SharedPtr(const SharedPtr& other)
+	:m_ptr(other.m_ptr),
+	m_refCount(other.m_refCount)
 {
-	m_ptr = other.m_ptr;
 	++(*m_refCount);
+	std::cout << "CopyCtor m_refCount:  "<<*(m_refCount) << std::endl;
 }
 
 
 template<typename T>
 SharedPtr<T>& SharedPtr<T>::operator= (const SharedPtr<T>& ptr)
 {	
-	if (m_ptr == &ptr)
-		return *m_ptr;
-	
-	delete []m_ptr;
-
-	m_ptr = ptr.m_ptr;
-	++(*m_refCount);
+	if (m_ptr != ptr.m_ptr)
+	{
+		release();
+		m_ptr = ptr.m_ptr;
+		m_refCount = ptr.m_refCount;
+		++(*m_refCount);
+	}
 	return *this;
+}
+
+
+template<typename T>
+SharedPtr<T>& SharedPtr<T>::operator= (T* ptr)
+{
+	release();
+	try
+	{
+		m_ptr = ptr;
+		m_refCount = new size_t(1);
+	}
+	catch(std::bad_alloc)
+	{
+		delete ptr;
+	}
+	return *this;	
 }
 
 
@@ -105,5 +142,4 @@ SharedPtr<T>::operator bool() const
 {
 	return m_ptr;
 }
-
 #endif

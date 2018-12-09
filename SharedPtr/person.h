@@ -13,7 +13,6 @@ private:
 	char m_name[32];
 	unsigned int m_id;
 	unsigned char m_age;
-	
 };
 #endif
 

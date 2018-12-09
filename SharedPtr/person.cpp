@@ -1,8 +1,10 @@
 #include "person.h"
 #include <iostream>
 #include <cstring>
-Person::Person()
+
+Person::Person():m_id(0), m_age(0)
 {
+	std::strcpy(m_name, " ");
 	std::cout<< "Person Ctor" <<std::endl;
 }
 
