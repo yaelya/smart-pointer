@@ -2,6 +2,7 @@
 #include "person.h"
 #include<iostream>
 
+// Auteur Yael
 using std::endl;
 using std::cout;
 
